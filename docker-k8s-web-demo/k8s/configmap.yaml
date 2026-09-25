@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web-demo-config
+  namespace: web-demo
+  labels:
+    app.kubernetes.io/name: web-demo
+data:
+  APP_NAME: web-demo
+  APP_VERSION: v1.0.0
+  LOG_LEVEL: INFO

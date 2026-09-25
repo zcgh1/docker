@@ -1,0 +1,19 @@
+services:
+  web:
+    build:
+      context: .
+      args:
+        APP_VERSION: compose
+    image: web-demo:compose
+    ports:
+      - "18080:18080"
+    environment:
+      APP_NAME: web-demo
+      LOG_LEVEL: INFO
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true

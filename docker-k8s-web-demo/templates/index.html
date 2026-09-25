@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Docker + Kubernetes Web Demo</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07101f;
+      --panel: rgba(15, 29, 52, 0.82);
+      --line: rgba(125, 211, 252, 0.22);
+      --text: #e8f2ff;
+      --muted: #93a8c4;
+      --accent: #38bdf8;
+      --accent-2: #22c55e;
+      --danger: #fb7185;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      overflow-x: hidden;
+      color: var(--text);
+      font-family: Inter, "Segoe UI", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(56, 189, 248, 0.18), transparent 35%),
+        radial-gradient(circle at 85% 90%, rgba(34, 197, 94, 0.14), transparent 32%),
+        var(--bg);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      opacity: 0.18;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(125, 211, 252, 0.16) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(125, 211, 252, 0.16) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, black, transparent);
+    }
+
+    main {
+      position: relative;
+      width: min(920px, calc(100% - 32px));
+      padding: 48px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: var(--panel);
+      box-shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
+      backdrop-filter: blur(18px);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 22px;
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .pulse {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent-2);
+      box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.12);
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    h1 {
+      max-width: 720px;
+      margin: 0;
+      font-size: clamp(34px, 6vw, 68px);
+      line-height: 1.02;
+      letter-spacing: -0.045em;
+    }
+
+    h1 span {
+      color: transparent;
+      background: linear-gradient(90deg, var(--accent), #a7f3d0);
+      background-clip: text;
+      -webkit-background-clip: text;
+    }
+
+    .intro {
+      max-width: 680px;
+      margin: 24px 0 34px;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.75;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .card {
+      min-width: 0;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(4, 12, 25, 0.52);
+    }
+
+    .card-label {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .endpoint {
+      margin: 0;
+      color: #bae6fd;
+      font-family: "Cascadia Code", Consolas, monospace;
+      font-size: 18px;
+      overflow-wrap: anywhere;
+    }
+
+    pre {
+      min-height: 154px;
+      margin: 0;
+      padding: 18px;
+      overflow: auto;
+      border: 1px solid rgba(125, 211, 252, 0.16);
+      border-radius: 14px;
+      color: #bbf7d0;
+      background: #030811;
+      font: 13px/1.65 "Cascadia Code", Consolas, monospace;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    pre.error { color: var(--danger); }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 13px 22px;
+      color: #04111f;
+      background: linear-gradient(135deg, #7dd3fc, #86efac);
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(56, 189, 248, 0.24);
+    }
+
+    button:active { transform: translateY(0); }
+
+    .status {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    footer {
+      margin-top: 30px;
+      color: #6f86a4;
+      font-size: 13px;
+    }
+
+    @keyframes pulse {
+      50% { opacity: 0.45; transform: scale(0.82); }
+    }
+
+    @media (max-width: 680px) {
+      main { padding: 30px 22px; border-radius: 22px; }
+      .grid { grid-template-columns: 1fr; }
+      .intro { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="eyebrow"><span class="pulse"></span>Container is running</div>
+    <h1>Docker 打包，<span>Kubernetes 部署。</span></h1>
+    <p class="intro">
+      这是一个用于练习的最小 Web 示例。页面展示部署信息，并通过浏览器调用后端
+      <code>/api/hello</code> 接口；健康检查接口供 Docker 和 Kubernetes 探针使用。
+    </p>
+
+    <section class="grid" aria-label="服务信息">
+      <article class="card">
+        <p class="card-label">Web 页面</p>
+        <p class="endpoint">GET /</p>
+      </article>
+      <article class="card">
+        <p class="card-label">访问接口</p>
+        <p class="endpoint">GET /api/hello</p>
+      </article>
+    </section>
+
+    <div class="actions">
+      <button id="call-api" type="button">调用访问接口</button>
+      <span id="status" class="status">等待调用</span>
+    </div>
+
+    <pre id="response" aria-live="polite">{
+  "tip": "点击上方按钮，从当前 Pod 获取接口响应"
+}</pre>
+
+    <footer>健康检查：/healthz · 就绪检查：/readyz</footer>
+  </main>
+
+  <script>
+    const button = document.querySelector("#call-api");
+    const status = document.querySelector("#status");
+    const response = document.querySelector("#response");
+
+    async function callApi() {
+      button.disabled = true;
+      status.textContent = "请求中...";
+      response.classList.remove("error");
+
+      try {
+        const result = await fetch("/api/hello", { cache: "no-store" });
+        const data = await result.json();
+        response.textContent = JSON.stringify(data, null, 2);
+        status.textContent = result.ok ? `HTTP ${result.status} · 调用成功` : `HTTP ${result.status}`;
+      } catch (error) {
+        response.textContent = `请求失败：${error.message}`;
+        response.classList.add("error");
+        status.textContent = "调用失败";
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    button.addEventListener("click", callApi);
+    callApi();
+  </script>
+</body>
+</html>
